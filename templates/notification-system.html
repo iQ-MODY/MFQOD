@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notification System - MFQOD</title>
+  <link rel="icon" type="image/x-icon" href="static/uploads/website/favicon.ico" >
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary: #2563eb; --primary-dark: #1d4ed8; --secondary: #06b6d4;
+      --success: #10b981; --error: #ef4444; --warning: #f59e0b; --info: #3b82f6;
+      --bg-light: #f8fafc; --bg-dark: #0f172a;
+      --card-light: #ffffff; --card-dark: #1e293b;
+      --text-light: #1e293b; --text-dark: #f1f5f9;
+      --border-light: #e2e8f0; --border-dark: #334155;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh; background: var(--bg-light); color: var(--text-light);
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark { background: var(--bg-dark); color: var(--text-dark); }
+
+    /* Navbar */
+    .navbar {
+      background: var(--card-light); border-bottom: 1px solid var(--border-light);
+      padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); position: sticky; top: 0; z-index: 100;
+    }
+    .dark .navbar { background: var(--card-dark); border-color: var(--border-dark); }
+
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .nav-brand-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+      justify-content: center; font-size: 18px; background: transparent;
+      color: white; -webkit-background-clip: initial !important; -webkit-text-fill-color: initial !important;
+    }
+
+    .theme-toggle {
+      width: 36px; height: 36px; background: var(--bg-light); border: 2px solid var(--border-light);
+      border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 16px; transition: all 0.3s;
+    }
+    .dark .theme-toggle { background: var(--bg-dark); border-color: var(--border-dark); }
+    .theme-toggle:hover { transform: rotate(180deg); }
+
+    /* Container */
+    .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+    .page-title {
+      font-size: 32px; font-weight: 700; margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .page-subtitle { font-size: 16px; color: #64748b; margin-bottom: 30px; }
+
+    /* Demo Section */
+    .demo-section {
+      background: var(--card-light); border: 1px solid var(--border-light);
+      border-radius: 16px; padding: 30px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .dark .demo-section { background: var(--card-dark); border-color: var(--border-dark); }
+
+    .demo-title {
+      font-size: 20px; font-weight: 600; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .button-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px; margin-top: 16px;
+    }
+
+    .demo-btn {
+      padding: 14px 20px; border: none; border-radius: 12px;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: all 0.3s; color: white;
+    }
+
+    .demo-btn.success { background: linear-gradient(135deg, #10b981, #059669); }
+    .demo-btn.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .demo-btn.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .demo-btn.info { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+
+    .demo-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); }
+
+    /* Notification Container */
+    .notification-container {
+      position: fixed; top: 80px; right: 20px; z-index: 9999;
+      display: flex; flex-direction: column; gap: 12px;
+      max-width: 400px; width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .notification-container { right: 10px; left: 10px; max-width: none; }
+    }
+
+    /* Notification Toast */
+    .notification {
+      background: var(--card-light); border: 2px solid var(--border-light);
+      border-radius: 12px; padding: 16px 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      display: flex; align-items: flex-start; gap: 12px;
+      animation: slideIn 0.3s ease-out;
+      position: relative; overflow: hidden;
+    }
+
+    .dark .notification { background: var(--card-dark); border-color: var(--border-dark); }
+
+    @keyframes slideIn {
+      from { transform: translateX(400px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(400px); opacity: 0; }
+    }
+
+    .notification.hiding { animation: slideOut 0.3s ease-in forwards; }
+
+    .notification-icon {
+      width: 28px; height: 28px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+
+    .notification.success .notification-icon { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+    .notification.error .notification-icon { background: rgba(239, 68, 68, 0.15); color: var(--error); }
+    .notification.warning .notification-icon { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .notification.info .notification-icon { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+
+    .notification-content { flex: 1; }
+    .notification-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+    .notification-message { font-size: 13px; color: #64748b; line-height: 1.5; }
+
+    .notification-close {
+      width: 24px; height: 24px; border: none; background: var(--bg-light);
+      border-radius: 6px; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; font-size: 14px; color: #64748b;
+      transition: all 0.2s; flex-shrink: 0;
+    }
+    .dark .notification-close { background: var(--bg-dark); }
+    .notification-close:hover { background: var(--border-light); }
+    .dark .notification-close:hover { background: var(--border-dark); }
+
+    .notification-progress {
+      position: absolute; bottom: 0; left: 0; height: 3px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      transition: width linear;
+    }
+
+    /* Confirmation Dialog */
+    .dialog-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5); z-index: 10000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px; opacity: 0; animation: fadeIn 0.2s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    .dialog-overlay.hiding { animation: fadeOut 0.2s ease-in forwards; }
+
+    .dialog {
+      background: var(--card-light); border: 2px solid var(--border-light);
+      border-radius: 16px; max-width: 500px; width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: scaleIn 0.2s ease-out;
+    }
+
+    .dark .dialog { background: var(--card-dark); border-color: var(--border-dark); }
+
+    @keyframes scaleIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .dialog-header {
+      padding: 24px 24px 16px; display: flex; align-items: center; gap: 12px;
+    }
+
+    .dialog-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; flex-shrink: 0;
+    }
+
+    .dialog.success .dialog-icon { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+    .dialog.error .dialog-icon { background: rgba(239, 68, 68, 0.15); color: var(--error); }
+    .dialog.warning .dialog-icon { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .dialog.info .dialog-icon { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+
+    .dialog-header-content { flex: 1; }
+    .dialog-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .dialog-subtitle { font-size: 13px; color: #64748b; }
+
+    .dialog-body {
+      padding: 0 24px 24px; font-size: 15px; line-height: 1.6;
+      color: var(--text-light);
+    }
+    .dark .dialog-body { color: var(--text-dark); }
+
+    .dialog-footer {
+      padding: 16px 24px; display: flex; gap: 12px; justify-content: flex-end;
+      border-top: 1px solid var(--border-light);
+    }
+    .dark .dialog-footer { border-color: var(--border-dark); }
+
+    .dialog-btn {
+      padding: 12px 24px; border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: all 0.3s; min-width: 100px;
+    }
+
+    .dialog-btn.cancel {
+      background: var(--bg-light); color: var(--text-light);
+      border: 2px solid var(--border-light);
+    }
+    .dark .dialog-btn.cancel {
+      background: var(--bg-dark); color: var(--text-dark); border-color: var(--border-dark);
+    }
+    .dialog-btn.cancel:hover { background: var(--border-light); }
+    .dark .dialog-btn.cancel:hover { background: var(--border-dark); }
+
+    .dialog-btn.confirm {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+    }
+    .dialog-btn.confirm:hover {
+      transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+    }
+
+    .dialog-btn.confirm.danger {
+      background: linear-gradient(135deg, var(--error), #dc2626);
+    }
+    .dialog-btn.confirm.danger:hover {
+      box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Code Block */
+    .code-section {
+      background: var(--card-light); border: 1px solid var(--border-light);
+      border-radius: 16px; padding: 30px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .dark .code-section { background: var(--card-dark); border-color: var(--border-dark); }
+
+    .code-block {
+      background: #1e293b; color: #f1f5f9; padding: 20px;
+      border-radius: 12px; overflow-x: auto; font-family: 'Courier New', monospace;
+      font-size: 13px; line-height: 1.6; position: relative;
+    }
+
+    .copy-btn {
+      position: absolute; top: 12px; right: 12px;
+      padding: 8px 12px; background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px; color: white; font-size: 12px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .copy-btn:hover { background: rgba(255, 255, 255, 0.2); }
+
+    @media (max-width: 768px) {
+      .container { padding: 15px; }
+      .page-title { font-size: 24px; }
+      .button-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+        <div class="nav-brand">
+            <div class="nav-brand-icon">
+                <img src="static/uploads/website/FindMeLogo.png" alt="Logo" style="width: 65px; height: 65px; object-fit: cover;">
+            </div>
+            <span>MFQOD</span>
+        </div>
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span id="theme-icon">🌙</span>
+    </button>
+  </nav>
+
+  <div class="container">
+    <h1 class="page-title">Notification & Dialog System</h1>
+    <p class="page-subtitle">Beautiful notifications and confirmation dialogs for your app</p>
+
+    <!-- Notification Demos -->
+    <div class="demo-section">
+      <div class="demo-title">🔔 Notification Toasts</div>
+      <p style="color: #64748b; margin-bottom: 16px; font-size: 14px;">
+        Click the buttons below to see different notification types in action
+      </p>
+      <div class="button-grid">
+        <button class="demo-btn success" onclick="showSuccessNotification()">
+          ✅ Success Notification
+        </button>
+        <button class="demo-btn error" onclick="showErrorNotification()">
+          ❌ Error Notification
+        </button>
+        <button class="demo-btn warning" onclick="showWarningNotification()">
+          ⚠️ Warning Notification
+        </button>
+        <button class="demo-btn info" onclick="showInfoNotification()">
+          ℹ️ Info Notification
+        </button>
+      </div>
+    </div>
+
+    <!-- Dialog Demos -->
+    <div class="demo-section">
+      <div class="demo-title">💬 Confirmation Dialogs</div>
+      <p style="color: #64748b; margin-bottom: 16px; font-size: 14px;">
+        Click the buttons below to see different dialog types
+      </p>
+      <div class="button-grid">
+        <button class="demo-btn success" onclick="showSuccessDialog()">
+          ✅ Success Dialog
+        </button>
+        <button class="demo-btn error" onclick="showDeleteDialog()">
+          🗑️ Delete Confirmation
+        </button>
+        <button class="demo-btn warning" onclick="showWarningDialog()">
+          ⚠️ Warning Dialog
+        </button>
+        <button class="demo-btn info" onclick="showInfoDialog()">
+          ℹ️ Info Dialog
+        </button>
+      </div>
+    </div>
+
+    <!-- JavaScript Code -->
+    <div class="code-section">
+      <div class="demo-title">📝 Implementation Code</div>
+      <p style="color: #64748b; margin-bottom: 16px; font-size: 14px;">
+        Copy and paste this code into your project
+      </p>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode()">📋 Copy</button>
+<pre id="sourceCode">// ========== NOTIFICATION SYSTEM ==========
+
+function showNotification(options) {
+  const container = getNotificationContainer();
+  
+  const notification = document.createElement('div');
+  notification.className = `notification ${options.type}`;
+  
+  const icons = {
+    success: '✅',
+    error: '❌',
+    warning: '⚠️',
+    info: 'ℹ️'
+  };
+  
+  notification.innerHTML = `
+    &lt;div class="notification-icon"&gt;${icons[options.type]}&lt;/div&gt;
+    &lt;div class="notification-content"&gt;
+      &lt;div class="notification-title"&gt;${options.title}&lt;/div&gt;
+      &lt;div class="notification-message"&gt;${options.message}&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;button class="notification-close" onclick="closeNotification(this)"&gt;✕&lt;/button&gt;
+    &lt;div class="notification-progress"&gt;&lt;/div&gt;
+  `;
+  
+  container.appendChild(notification);
+  
+  const duration = options.duration || 5000;
+  const progress = notification.querySelector('.notification-progress');
+  progress.style.width = '100%';
+  progress.style.transition = `width ${duration}ms linear`;
+  
+  setTimeout(() => {
+    progress.style.width = '0%';
+  }, 10);
+  
+  setTimeout(() => {
+    closeNotification(notification.querySelector('.notification-close'));
+  }, duration);
+}
+
+function getNotificationContainer() {
+  let container = document.querySelector('.notification-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.className = 'notification-container';
+    document.body.appendChild(container);
+  }
+  return container;
+}
+
+function closeNotification(button) {
+  const notification = button.closest('.notification');
+  notification.classList.add('hiding');
+  setTimeout(() => notification.remove(), 300);
+}
+
+// ========== DIALOG SYSTEM ==========
+
+function showDialog(options) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'dialog-overlay';
+    
+    const icons = {
+      success: '✅',
+      error: '❌',
+      warning: '⚠️',
+      info: 'ℹ️'
+    };
+    
+    const isDanger = options.type === 'error' || options.danger;
+    
+    overlay.innerHTML = `
+      &lt;div class="dialog ${options.type}"&gt;
+        &lt;div class="dialog-header"&gt;
+          &lt;div class="dialog-icon"&gt;${icons[options.type]}&lt;/div&gt;
+          &lt;div class="dialog-header-content"&gt;
+            &lt;div class="dialog-title"&gt;${options.title}&lt;/div&gt;
+            ${options.subtitle ? `&lt;div class="dialog-subtitle"&gt;${options.subtitle}&lt;/div&gt;` : ''}
+          &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="dialog-body"&gt;${options.message}&lt;/div&gt;
+        &lt;div class="dialog-footer"&gt;
+          &lt;button class="dialog-btn cancel"&gt;${options.cancelText || 'Cancel'}&lt;/button&gt;
+          &lt;button class="dialog-btn confirm ${isDanger ? 'danger' : ''}"&gt;
+            ${options.confirmText || 'Confirm'}
+          &lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    const cancelBtn = overlay.querySelector('.cancel');
+    const confirmBtn = overlay.querySelector('.confirm');
+    
+    function closeDialog(result) {
+      overlay.classList.add('hiding');
+      setTimeout(() => {
+        overlay.remove();
+        resolve(result);
+      }, 200);
+    }
+    
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeDialog(false);
+    });
+    
+    cancelBtn.addEventListener('click', () => closeDialog(false));
+    confirmBtn.addEventListener('click', () => closeDialog(true));
+  });
+}
+
+// ========== USAGE EXAMPLES ==========
+
+// Notifications:
+showNotification({
+  type: 'success',
+  title: 'Success!',
+  message: 'Your profile has been updated successfully',
+  duration: 5000
+});
+
+// Dialogs (returns Promise):
+const confirmed = await showDialog({
+  type: 'warning',
+  title: 'Delete Account',
+  subtitle: 'This action cannot be undone',
+  message: 'Are you sure you want to delete your account?',
+  confirmText: 'Delete',
+  cancelText: 'Cancel',
+  danger: true
+});
+
+if (confirmed) {
+  // User clicked confirm
+}</pre>
+      </div>
+    </div>
+
+    <!-- CSS Required -->
+    <div class="code-section">
+      <div class="demo-title">🎨 Required CSS</div>
+      <p style="color: #64748b; margin-bottom: 16px; font-size: 14px;">
+        Add this CSS to your stylesheet (already included in the full HTML file below)
+      </p>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCss()">📋 Copy</button>
+<pre id="cssCode">/* Copy all notification and dialog styles from the &lt;style&gt; section above */</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Container (auto-created by JS) -->
+
+  <script>
+    // Theme Toggle
+    function toggleTheme() {
+      document.body.classList.toggle('dark');
+      const icon = document.getElementById('theme-icon');
+      icon.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    }
+    
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark');
+      document.getElementById('theme-icon').textContent = '☀️';
+    }
+
+    // ========== NOTIFICATION SYSTEM ==========
+    
+    function showNotification(options) {
+      const container = getNotificationContainer();
+      
+      const notification = document.createElement('div');
+      notification.className = `notification ${options.type}`;
+      
+      const icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+      };
+      
+      notification.innerHTML = `
+        <div class="notification-icon">${icons[options.type]}</div>
+        <div class="notification-content">
+          <div class="notification-title">${options.title}</div>
+          <div class="notification-message">${options.message}</div>
+        </div>
+        <button class="notification-close" onclick="closeNotification(this)">✕</button>
+        <div class="notification-progress"></div>
+      `;
+      
+      container.appendChild(notification);
+      
+      const duration = options.duration || 5000;
+      const progress = notification.querySelector('.notification-progress');
+      progress.style.width = '100%';
+      progress.style.transition = `width ${duration}ms linear`;
+      
+      setTimeout(() => {
+        progress.style.width = '0%';
+      }, 10);
+      
+      setTimeout(() => {
+        closeNotification(notification.querySelector('.notification-close'));
+      }, duration);
+    }
+    
+    function getNotificationContainer() {
+      let container = document.querySelector('.notification-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.className = 'notification-container';
+        document.body.appendChild(container);
+      }
+      return container;
+    }
+    
+    function closeNotification(button) {
+      const notification = button.closest('.notification');
+      notification.classList.add('hiding');
+      setTimeout(() => notification.remove(), 300);
+    }
+    
+    // ========== DIALOG SYSTEM ==========
+    
+    function showDialog(options) {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'dialog-overlay';
+        
+        const icons = {
+          success: '✅',
+          error: '❌',
+          warning: '⚠️',
+          info: 'ℹ️'
+        };
+        
+        const isDanger = options.type === 'error' || options.danger;
+        
+        overlay.innerHTML = `
+          <div class="dialog ${options.type}">
+            <div class="dialog-header">
+              <div class="dialog-icon">${icons[options.type]}</div>
+              <div class="dialog-header-content">
+                <div class="dialog-title">${options.title}</div>
+                ${options.subtitle ? `<div class="dialog-subtitle">${options.subtitle}</div>` : ''}
+              </div>
+            </div>
+            <div class="dialog-body">${options.message}</div>
+            <div class="dialog-footer">
+              <button class="dialog-btn cancel">${options.cancelText || 'Cancel'}</button>
+              <button class="dialog-btn confirm ${isDanger ? 'danger' : ''}">${options.confirmText || 'Confirm'}</button>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        
+        const cancelBtn = overlay.querySelector('.cancel');
+        const confirmBtn = overlay.querySelector('.confirm');
+        
+        function closeDialog(result) {
+          overlay.classList.add('hiding');
+          setTimeout(() => {
+            overlay.remove();
+            resolve(result);
+          }, 200);
+        }
+        
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) closeDialog(false);
+        });
+        
+        cancelBtn.addEventListener('click', () => closeDialog(false));
+        confirmBtn.addEventListener('click', () => closeDialog(true));
+      });
+    }
+    
+    // ========== DEMO FUNCTIONS ==========
+    
+    function showSuccessNotification() {
+      showNotification({
+        type: 'success',
+        title: 'Success!',
+        message: 'Your profile has been updated successfully',
+        duration: 5000
+      });
+    }
+    
+    function showErrorNotification() {
+      showNotification({
+        type: 'error',
+        title: 'Error Occurred',
+        message: 'Failed to save changes. Please try again later.',
+        duration: 5000
+      });
+    }
+    
+    function showWarningNotification() {
+      showNotification({
+        type: 'warning',
+        title: 'Warning',
+        message: 'Your session will expire in 5 minutes. Please save your work.',
+        duration: 5000
+      });
+    }
+    
+    function showInfoNotification() {
+      showNotification({
+        type: 'info',
+        title: 'New Feature Available',
+        message: 'Check out our new dark mode feature in settings!',
+        duration: 5000
+      });
+    }
+    
+    async function showSuccessDialog() {
+      const result = await showDialog({
+        type: 'success',
+        title: 'Account Created',
+        subtitle: 'Welcome to MFQOD!',
+        message: 'Your account has been successfully created. You can now start exploring the platform.',
+        confirmText: 'Get Started',
+        cancelText: 'Later'
+      });
+      
+      if (result) {
+        showNotification({
+          type: 'success',
+          title: 'Welcome!',
+          message: 'Let\'s get you started with MFQOD',
+          duration: 3000
+        });
+      }
+    }
+    
+    async function showDeleteDialog() {
+      const result = await showDialog({
+        type: 'error',
+        title: 'Delete Account',
+        subtitle: 'This action cannot be undone',
+        message: 'Are you sure you want to permanently delete your account? All your data will be lost forever.',
+        confirmText: 'Delete Account',
+        cancelText: 'Cancel',
+        danger: true
+      });
+      
+      if (result) {
+        showNotification({
+          type: 'success',
+          title: 'Account Deleted',
+          message: 'Your account has been permanently deleted',
+          duration: 3000
+        });
+      }
+    }
+    
+    async function showWarningDialog() {
+      const result = await showDialog({
+        type: 'warning',
+        title: 'Unsaved Changes',
+        subtitle: 'You have unsaved changes',
+        message: 'Are you sure you want to leave this page? Your changes will be lost if you don\'t save them.',
+        confirmText: 'Leave Page',
+        cancelText: 'Stay'
+      });
+      
+      if (result) {
+        showNotification({
+          type: 'info',
+          title: 'Page Left',
+          message: 'Navigating away from the page...',
+          duration: 2000
+        });
+      }
+    }
+    
+    async function showInfoDialog() {
+      const result = await showDialog({
+        type: 'info',
+        title: 'System Update',
+        subtitle: 'Version 2.0.0 is available',
+        message: 'A new version of MFQOD is available with exciting new features and improvements. Would you like to update now?',
+        confirmText: 'Update Now',
+        cancelText: 'Later'
+      });
+      
+      if (result) {
+        showNotification({
+          type: 'success',
+          title: 'Update Started',
+          message: 'Downloading update... Please wait.',
+          duration: 3000
+        });
+      }
+    }
+    
+    // Copy Code Functions
+    function copyCode() {
+      const code = document.getElementById('sourceCode').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        showNotification({
+          type: 'success',
+          title: 'Copied!',
+          message: 'JavaScript code copied to clipboard',
+          duration: 2000
+        });
+      });
+    }
+    
+    function copyCss() {
+      showNotification({
+        type: 'info',
+        title: 'CSS Included',
+        message: 'All CSS is in the &lt;style&gt; section of the HTML file',
+        duration: 3000
+      });
+    }
+  </script>
+</body>
+</html>

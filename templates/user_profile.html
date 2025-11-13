@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ profile_user['name'] }}'s Profile - MFQOD</title>
+    <link rel="icon" type="image/x-icon" href="static/uploads/website/favicon.ico" >
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <style>
+        .back-btn {
+            display: inline-flex; align-items: center; gap: 8px; color: var(--primary); text-decoration: none;
+            font-weight: 600; margin-bottom: 24px; transition: all 0.3s;
+        }
+        .back-btn:hover { gap: 12px; }
+        .profile-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 16px; padding: 40px; color: white; margin-bottom: 30px;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3); position: relative; overflow: hidden;
+        }
+        .profile-header::before {
+            content: ''; position: absolute; top: 0; right: 0; width: 300px; height: 300px;
+            background: rgba(255, 255, 255, 0.1); border-radius: 50%; transform: translate(30%, -30%);
+        }
+        .profile-content { display: flex; align-items: center; gap: 30px; position: relative; z-index: 1; }
+        .profile-avatar {
+            width: 120px; height: 120px; background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 48px; flex-shrink: 0; position: relative;
+        }
+        .profile-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .online-indicator {
+            position: absolute; bottom: 5px; right: 5px; width: 20px; height: 20px;
+            background: var(--success); border: 4px solid white; border-radius: 50%;
+        }
+        .profile-info { flex: 1; }
+        .profile-name { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+        .profile-email { font-size: 16px; opacity: 0.9; margin-bottom: 12px; }
+        .profile-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+        .badge {
+            padding: 6px 12px; background: rgba(255, 255, 255, 0.2); border-radius: 16px;
+            font-size: 13px; font-weight: 600;
+        }
+        .badge.verified { background: var(--success); }
+        .badge.admin { background: var(--error); }
+        .profile-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+        .btn {
+            padding: 12px 24px; background: rgba(255, 255, 255, 0.2); color: white; border: none;
+            border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn:hover { background: rgba(255, 255, 255, 0.3); transform: translateY(-2px); }
+        .btn-primary { background: white; color: var(--primary); }
+        .btn-primary:hover { background: rgba(255, 255, 255, 0.9); }
+        .btn-danger { background: var(--error); }
+        .info-section {
+            background: var(--card-light); border: 1px solid var(--border-light);
+            border-radius: 16px; padding: 30px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .dark .info-section { background: var(--card-dark); border-color: var(--border-dark); }
+        .section-title {
+            font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+        }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .info-item { }
+        .info-label { font-size: 13px; color: #64748b; margin-bottom: 6px; font-weight: 600; }
+        .info-value { font-size: 16px; color: var(--text-light); }
+        .dark .info-value { color: var(--text-dark); }
+        .bio-text { font-size: 15px; line-height: 1.6; color: #64748b; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; }
+        .stat-card {
+            background: var(--bg-light); border-radius: 12px; padding: 20px; text-align: center;
+        }
+        .dark .stat-card { background: var(--bg-dark); }
+        .stat-value { font-size: 28px; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
+        .stat-label { font-size: 13px; color: #64748b; }
+        .alert {
+            padding: 14px 16px; border-radius: 12px; margin-bottom: 20px; font-size: 14px; display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .alert.success { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); color: var(--success); }
+        .alert.error { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--error); color: var(--error); }
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .profile-content { flex-direction: column; text-align: center; }
+            .profile-name { font-size: 24px; }
+            .profile-actions { justify-content: center; }
+            .info-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand">
+        <div class="nav-brand-icon">
+            <img src="static/uploads/website/FindMeLogo.png" alt="Logo" style="width: 65px; height: 65px; object-fit: cover;">
+        </div>
+        <span>MFQOD</span>
+    </div>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <div class="nav-menu" id="navMenu">
+        <a href="/home" class="nav-link">🏠 Home</a>
+        {% if not is_guest %}
+        <a href="/dashboard" class="nav-link">📊 Dashboard</a>
+        {% endif %}
+        <a href="/users" class="nav-link">👥 Users</a>
+        {% if not is_guest %}
+        <a href="/messages" class="nav-link">📨 Messages</a>
+        <a href="/profile" class="nav-link">👤 Profile</a>
+        <a href="/settings" class="nav-link">⚙️ Settings</a>
+        {% if user and user.get('is_admin') %}
+        <a href="/admin" class="nav-link">👨‍💻 Admin</a>
+        {% endif %}
+        {% endif %}
+    </div>
+    <div class="nav-actions">
+        {% if not is_guest %}
+        <button class="notif-btn" onclick="window.location.href='/notifications'">
+            <span>🔔</span>
+            {% if user and user.get('unread_notifications', 0) > 0 %}
+            <span class="notif-badge">{{ user['unread_notifications'] }}</span>
+            {% endif %}
+        </button>
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+            <span id="theme-icon">🌙</span>
+        </button>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+        {% else %}
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+            <span id="theme-icon">🌙</span>
+        </button>
+        <a href="/login" class="logout-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">Login</a>
+        {% endif %}
+    </div>
+</nav>
+    <div class="container">
+        <a href="/users" class="back-btn">← Back to Users</a>
+        <div id="alert" class="alert"></div>
+        <div class="profile-header">
+            <div class="profile-content">
+                <div class="profile-avatar">
+                    {% if profile_user.get('avatar') %}
+                    <img src="static/uploads/avatars/{{ profile_user['avatar'] }}" alt="{{ profile_user['name'] }}">
+                    {% else %}
+                    {{ profile_user['name'][0].upper() }}
+                    {% endif %}
+                    {% if profile_user.get('is_online') %}
+                    <div class="online-indicator" title="Online"></div>
+                    {% endif %}
+                </div>
+                <div class="profile-info">
+                    <div class="profile-name">{{ profile_user['name'] }}</div>
+                    <div class="profile-email">{{ profile_user['email'] }}</div>
+                    <div class="profile-badges">
+                        {% if profile_user.get('email_verified') %}
+                        <span class="badge verified">✓ Verified</span>
+                        {% endif %}
+                        {% if profile_user.get('is_admin') %}
+                        <span class="badge admin">⭐ Admin</span>
+                        {% endif %}
+                        {% if profile_user.get('two_factor_enabled') %}
+                        <span class="badge">🔒 2FA Enabled</span>
+                        {% endif %}
+                    </div>
+                    <div class="profile-actions">
+                    {% if not is_blocked and not is_own_profile %}
+                        <a href="/chat/{{ profile_user.id }}" class="btn btn-primary">💬 Send Message</a>
+                        <button class="btn" onclick="blockUser('{{ profile_user.id }}')">🚫 Block User</button>
+                        <button class="btn btn-danger" onclick="reportUser('{{ profile_user.id }}')">⚠️ Report</button>
+                    {% elif is_blocked %}
+                        <button class="btn" onclick="unblockUser('{{ profile_user.id }}')">✓ Unblock User</button>
+                    {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if profile_user.get('bio') or profile_user.get('phone') or profile_user.get('language') %}
+        <div class="info-section">
+            <h2 class="section-title">📋 About</h2>
+            {% if profile_user.get('bio') %}
+            <p class="bio-text">{{ profile_user['bio'] }}</p>
+            {% else %}
+            <p class="bio-text" style="opacity: 0.5;">No bio available</p>
+            {% endif %}
+        </div>
+        {% endif %}
+        <div class="info-section">
+            <h2 class="section-title">ℹ️ Information</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Member Since</div>
+                    <div class="info-value">{{ profile_user['created_at'][:10] }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Phone Number</div>
+                    <div class="info-value">{{ profile_user.get('phone', 'Not Provided') }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Last Seen</div>
+                    <div class="info-value">
+                        {% if profile_user.get('is_online') %}
+                        <span style="color: var(--success);">🟢 Online Now</span>
+                        {% elif profile_user.get('last_login') %}
+                        {{ profile_user['last_login'][:10] }}
+                        {% else %}
+                        Never
+                        {% endif %}
+                    </div>
+                </div>
+                {% if profile_user.get('language') %}
+                <div class="info-item">
+                    <div class="info-label">Language</div>
+                    <div class="info-value">
+                        {% if profile_user['language'] == 'en' %}English
+                        {% elif profile_user['language'] == 'ar' %}العربية
+                        {% elif profile_user['language'] == 'es' %}كوردی
+                        {% elif profile_user['language'] == 'fr' %}Français
+                        {% elif profile_user['language'] == 'de' %}Deutsch
+                        {% else %}{{ profile_user['language'] }}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% if profile_user.get('stats') %}
+        <div class="info-section">
+            <h2 class="section-title">📊 Activity Stats</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">{{ profile_user['stats'].get('total_logins', 0) }}</div>
+                    <div class="stat-label">Total Logins</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ profile_user['stats'].get('projects_count', 0) }}</div>
+                    <div class="stat-label">Projects</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ profile_user['stats'].get('tasks_completed', 0) }}</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ profile_user['stats'].get('tasks_in_progress', 0) }}</div>
+                    <div class="stat-label">In Progress</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert ${type}`;
+            alert.style.display = 'block';
+            setTimeout(() => { alert.style.display = 'none'; }, 5000);
+        }
+        async function blockUser(userId) {
+            const confirmed = await showDialog({
+                type: 'warning',
+                title: 'Block User',
+                subtitle: 'This user will no longer be able to contact you',
+                message: 'Are you sure you want to block this user? They won\'t be able to send you messages or view your profile.',
+                confirmText: 'Block User',
+                cancelText: 'Cancel',
+                danger: true
+            });
+            if (!confirmed) return;
+            try {
+                const response = await fetch(`/api/block-user/${userId}`, { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    showNotification({ type: 'success', title: 'User Blocked', message: 'User has been blocked successfully', duration: 2000 });
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showNotification({ type: 'error', title: 'Block Failed', message: data.message || 'Failed to block user', duration: 3000 });
+                }
+            } catch (error) {
+                showNotification({ type: 'error', title: 'Error', message: 'An error occurred while blocking user', duration: 3000 });
+            }
+        }
+        async function unblockUser(userId) {
+            const confirmed = await showDialog({
+                type: 'info',
+                title: 'Unblock User',
+                subtitle: 'This user will be able to contact you again',
+                message: 'Are you sure you want to unblock this user?',
+                confirmText: 'Unblock User',
+                cancelText: 'Cancel'
+            });
+            if (!confirmed) return;
+            try {
+                const response = await fetch(`/api/unblock-user/${userId}`, { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    showNotification({ type: 'success', title: 'User Unblocked', message: 'User has been unblocked successfully', duration: 2000 });
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showNotification({ type: 'error', title: 'Unblock Failed', message: data.message || 'Failed to unblock user', duration: 3000 });
+                }
+            } catch (error) {
+                showNotification({ type: 'error', title: 'Error', message: 'An error occurred while unblocking user', duration: 3000 });
+            }
+        }
+        async function reportUser(userId) {
+            const reason = prompt('Please provide a reason for reporting this user:');
+            if (!reason || reason.trim() === '') return;
+            try {
+                const response = await fetch(`/api/report-user/${userId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reason: reason.trim() })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showNotification({ type: 'success', title: 'Report Submitted', message: 'User reported successfully. Our team will review this report.', duration: 4000 });
+                } else {
+                    showNotification({ type: 'error', title: 'Report Failed', message: data.message || 'Failed to report user', duration: 3000 });
+                }
+            } catch (error) {
+                showNotification({ type: 'error', title: 'Error', message: 'An error occurred while reporting user', duration: 3000 });
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - MFQOD</title>
+    <link rel="icon" type="image/x-icon" href="static/uploads/website/favicon.ico">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .floating-shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: float 25s infinite ease-in-out;
+        }
+
+        .shape1 {
+            width: 400px;
+            height: 400px;
+            background: var(--primary);
+            top: -200px;
+            left: -200px;
+        }
+
+        .shape2 {
+            width: 500px;
+            height: 500px;
+            background: var(--secondary);
+            bottom: -250px;
+            right: -250px;
+            animation-delay: 7s;
+        }
+
+        .shape3 {
+            width: 300px;
+            height: 300px;
+            background: var(--accent);
+            top: 50%;
+            left: 50%;
+            animation-delay: 14s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+            25% { transform: translate(100px, -100px) rotate(90deg) scale(1.1); }
+            50% { transform: translate(50px, 50px) rotate(180deg) scale(0.9); }
+            75% { transform: translate(-100px, 100px) rotate(270deg) scale(1.05); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .card {
+            background: var(--card-light);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-light);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dark .card {
+            background: var(--card-dark);
+            border-color: var(--border-dark);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            border-radius: 24px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover::before {
+            opacity: 0.15;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 16px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            color: inherit;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            font-size: 16px;
+            background: var(--bg-light);
+            color: var(--text-light);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+        }
+
+        .dark input {
+            background: var(--bg-dark);
+            border-color: var(--border-dark);
+            color: var(--text-dark);
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .dark input:focus {
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+        }
+
+        .password-strength {
+            margin-top: 8px;
+            height: 4px;
+            background: var(--border-light);
+            border-radius: 2px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .dark .password-strength {
+            background: var(--border-dark);
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+
+        .password-hints {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .hint {
+            display: flex;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .hint::before {
+            content: '○';
+            margin-right: 6px;
+            color: #94a3b8;
+        }
+
+        .hint.valid::before {
+            content: '✓';
+            color: var(--success);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 24px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border-light);
+        }
+
+        .dark .divider::before {
+            background: var(--border-dark);
+        }
+
+        .divider span {
+            background: var(--card-light);
+            padding: 0 16px;
+            position: relative;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .dark .divider span {
+            background: var(--card-dark);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        a:hover {
+            color: var(--primary-dark);
+        }
+
+        a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
+
+        a:hover::after {
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .card { padding: 30px 24px; }
+            h1 { font-size: 28px; }
+            .shape1, .shape2, .shape3 { opacity: 0.05; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="floating-shape shape1"></div>
+        <div class="floating-shape shape2"></div>
+        <div class="floating-shape shape3"></div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <div class="logo">✨</div>
+                <h1>Create Account</h1>
+                <p class="subtitle">Join MFQOD and get started</p>
+            </div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" placeholder="John Doe" required autocomplete="name">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="you@example.com" required autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Create a strong password" required autocomplete="new-password">
+                    <div class="password-strength" id="strengthBar">
+                        <div class="password-strength-bar" id="strengthFill"></div>
+                    </div>
+                    <div class="password-hints">
+                        <div class="hint" id="hint-length">At least 6 characters</div>
+                        <div class="hint" id="hint-upper">One uppercase letter</div>
+                        <div class="hint" id="hint-lower">One lowercase letter</div>
+                        <div class="hint" id="hint-number">One number</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" placeholder="Confirm your password" required autocomplete="new-password">
+                </div>
+
+                <button type="submit" class="btn" id="submitBtn">Create Account</button>
+            </form>
+
+            <div class="divider">
+                <span>Already have an account?</span>
+            </div>
+
+            <a href="/login" style="display: block; text-align: center; font-weight: 600;">Sign In</a>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Initialize elements
+        const passwordInput = document.getElementById('password');
+        const strengthBar = document.getElementById('strengthBar');
+        const strengthFill = document.getElementById('strengthFill');
+        const form = document.getElementById('registerForm');
+
+        // Password strength checker
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            strengthBar.style.display = password ? 'block' : 'none';
+
+            let strength = 0;
+            const checks = {
+                length: password.length >= 6,
+                upper: /[A-Z]/.test(password),
+                lower: /[a-z]/.test(password),
+                number: /\d/.test(password)
+            };
+
+            // Update hints
+            document.getElementById('hint-length').classList.toggle('valid', checks.length);
+            document.getElementById('hint-upper').classList.toggle('valid', checks.upper);
+            document.getElementById('hint-lower').classList.toggle('valid', checks.lower);
+            document.getElementById('hint-number').classList.toggle('valid', checks.number);
+
+            // Calculate strength
+            strength = Object.values(checks).filter(Boolean).length;
+
+            // Update progress bar
+            const colors = ['#ef4444', '#f59e0b', '#eab308', '#10b981'];
+            const widths = ['25%', '50%', '75%', '100%'];
+            strengthFill.style.width = widths[strength - 1] || '0%';
+            strengthFill.style.background = colors[strength - 1] || '#ef4444';
+        });
+
+        // Form submission handler
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Client-side validation
+            if (!name || !email || !password || !confirmPassword) {
+                showNotification({
+                    type: 'error',
+                    title: 'Validation Error',
+                    message: 'All fields are required',
+                    duration: 3000
+                });
+                return;
+            }
+
+            if (name.length < 2) {
+                showNotification({
+                    type: 'error',
+                    title: 'Validation Error',
+                    message: 'Name must be at least 2 characters',
+                    duration: 3000
+                });
+                return;
+            }
+
+            if (password.length < 6) {
+                showNotification({
+                    type: 'error',
+                    title: 'Validation Error',
+                    message: 'Password must be at least 6 characters',
+                    duration: 3000
+                });
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showNotification({
+                    type: 'error',
+                    title: 'Password Mismatch',
+                    message: 'Passwords do not match. Please try again.',
+                    duration: 3000
+                });
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Creating Account<span class="spinner"></span>';
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        password: password,
+                        confirm_password: confirmPassword
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification({
+                        type: 'success',
+                        title: 'Account Created!',
+                        message: 'Your account has been created successfully. Redirecting to login...',
+                        duration: 2000
+                    });
+
+                    // Redirect to login after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                } else {
+                    showNotification({
+                        type: 'error',
+                        title: 'Registration Failed',
+                        message: data.message || 'An error occurred during registration',
+                        duration: 4000
+                    });
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showNotification({
+                    type: 'error',
+                    title: 'Error',
+                    message: 'An error occurred. Please try again.',
+                    duration: 3000
+                });
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+
+        // Input animation effects
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transition = 'transform 0.3s';
+                this.parentElement.style.transform = 'scale(1.01)';
+            });
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+
+        // Initialize theme
+        if (typeof initTheme === 'function') {
+            initTheme();
+        }
+    </script>
+</body>
+</html>

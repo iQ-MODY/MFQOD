@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - MFQOD</title>
+    <link rel="icon" type="image/x-icon" href="/static/uploads/website/favicon.ico">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-light);
+            min-height: 100vh;
+        }
+        
+        .dark body {
+            background: var(--bg-dark);
+            color: var(--text-dark);
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Page Header */
+        .page-header {
+            margin-bottom: 30px;
+            animation: slideDown 0.5s ease-out;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            padding: 50px 40px;
+            border-radius: 24px;
+            color: white;
+            box-shadow: 0 20px 60px rgba(37, 99, 235, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+        
+        .page-header-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .page-title {
+            font-size: 42px;
+            font-weight: 900;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .page-title-emoji {
+            font-size: 48px;
+            animation: rotate 3s ease-in-out infinite;
+        }
+        
+        @keyframes rotate {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(180deg); }
+        }
+        
+        .page-subtitle {
+            font-size: 18px;
+            opacity: 0.95;
+            font-weight: 500;
+        }
+        
+        /* Settings Navigation */
+        .settings-nav {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            background: var(--card-light);
+            padding: 8px;
+            border-radius: 18px;
+            border: 1px solid var(--border-light);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            overflow-x: auto;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .dark .settings-nav {
+            background: var(--card-dark);
+            border-color: var(--border-dark);
+        }
+        
+        .settings-nav-item {
+            flex: 1;
+            min-width: 150px;
+            padding: 14px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 14px;
+            color: var(--text-light);
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        
+        .dark .settings-nav-item {
+            color: var(--text-dark);
+        }
+        
+        .settings-nav-item.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            transform: scale(1.05);
+        }
+        
+        .settings-nav-item:hover:not(.active) {
+            background: var(--bg-light);
+            transform: scale(1.02);
+        }
+        
+        .dark .settings-nav-item:hover:not(.active) {
+            background: var(--bg-dark);
+        }
+        
+        /* Settings Section */
+        .settings-section {
+            background: var(--card-light);
+            border: 2px solid var(--border-light);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            animation: fadeInUp 0.4s ease-out;
+            transition: all 0.3s;
+        }
+        
+        .dark .settings-section {
+            background: var(--card-dark);
+            border-color: var(--border-dark);
+        }
+        
+        .settings-section:hover {
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12);
+            transform: translateY(-2px);
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-light);
+        }
+        
+        .dark .section-header {
+            border-color: var(--border-dark);
+        }
+        
+        .section-icon {
+            font-size: 28px;
+        }
+        
+        .section-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-light);
+        }
+        
+        .dark .section-title {
+            color: var(--text-dark);
+        }
+        
+        .section-description {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+        
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 10px;
+            color: var(--text-light);
+        }
+        
+        .dark .form-label {
+            color: var(--text-dark);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid var(--border-light);
+            border-radius: 14px;
+            font-size: 15px;
+            background: var(--bg-light);
+            color: var(--text-light);
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: inherit;
+        }
+        
+        .dark .form-input {
+            background: var(--bg-dark);
+            border-color: var(--border-dark);
+            color: var(--text-dark);
+        }
+        
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .form-input::placeholder {
+            color: #94a3b8;
+        }
+        
+        textarea.form-input {
+            resize: vertical;
+            min-height: 120px;
+            line-height: 1.6;
+        }
+        
+        .form-hint {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+        
+        /* Avatar Upload */
+        .avatar-upload-section {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            padding: 25px;
+            background: var(--bg-light);
+            border-radius: 16px;
+            margin-bottom: 25px;
+        }
+        
+        .dark .avatar-upload-section {
+            background: var(--bg-dark);
+        }
+        
+        .current-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            font-weight: 900;
+            flex-shrink: 0;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .current-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .avatar-upload-info {
+            flex: 1;
+        }
+        
+        .avatar-upload-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-light);
+        }
+        
+        .dark .avatar-upload-title {
+            color: var(--text-dark);
+        }
+        
+        .avatar-upload-hint {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 15px;
+        }
+        
+        .avatar-upload-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .file-input-label {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        
+        .file-input-label:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.5);
+        }
+        
+        .remove-avatar-btn {
+            padding: 12px 24px;
+            background: var(--bg-light);
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            color: var(--text-light);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .dark .remove-avatar-btn {
+            background: var(--bg-dark);
+            border-color: var(--border-dark);
+            color: var(--text-dark);
+        }
+        
+        .remove-avatar-btn:hover {
+            background: var(--error);
+            color: white;
+            border-color: var(--error);
+            transform: translateY(-2px);
+        }
+        
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid var(--border-light);
+        }
+        
+        .dark .btn-group {
+            border-color: var(--border-dark);
+        }
+        
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.5);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background: var(--bg-light);
+            border: 2px solid var(--border-light);
+            color: var(--text-light);
+        }
+        
+        .dark .btn-secondary {
+            background: var(--bg-dark);
+            border-color: var(--border-dark);
+            color: var(--text-dark);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--border-light);
+        }
+        
+        .dark .btn-secondary:hover {
+            background: var(--border-dark);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--error), #dc2626);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.5);
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Password Strength */
+        .password-strength {
+            margin-top: 10px;
+            height: 4px;
+            background: var(--border-light);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .password-strength-bar {
+            height: 100%;
+            width: 0;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+        
+        .password-strength-bar.weak {
+            width: 33%;
+            background: var(--error);
+        }
+        
+        .password-strength-bar.medium {
+            width: 66%;
+            background: #f59e0b;
+        }
+        
+        .password-strength-bar.strong {
+            width: 100%;
+            background: var(--success);
+        }
+        
+        .password-strength-text {
+            font-size: 12px;
+            margin-top: 6px;
+            font-weight: 600;
+        }
+        
+        /* Toggle Switch */
+        .toggle-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px;
+            background: var(--bg-light);
+            border-radius: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .dark .toggle-group {
+            background: var(--bg-dark);
+        }
+        
+        .toggle-label {
+            flex: 1;
+        }
+        
+        .toggle-title {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 4px;
+            color: var(--text-light);
+        }
+        
+        .dark .toggle-title {
+            color: var(--text-dark);
+        }
+        
+        .toggle-description {
+            font-size: 13px;
+            color: #64748b;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 56px;
+            height: 30px;
+            flex-shrink: 0;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--border-light);
+            border-radius: 30px;
+            transition: all 0.3s;
+        }
+        
+        .dark .toggle-slider {
+            background: var(--border-dark);
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .toggle-switch input:checked + .toggle-slider {
+            background: var(--primary);
+        }
+        
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* Danger Zone */
+        .danger-zone {
+            background: rgba(239, 68, 68, 0.05);
+            border: 2px solid rgba(239, 68, 68, 0.2);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        
+        .danger-zone-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--error);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .danger-zone-description {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        /* Success Message */
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid var(--success);
+            color: var(--success);
+            padding: 16px 20px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .page-header { padding: 40px 30px; }
+            .page-title { font-size: 32px; }
+            .settings-nav { flex-direction: column; }
+            .settings-nav-item { min-width: 100%; }
+            .settings-section { padding: 25px; }
+            .avatar-upload-section { flex-direction: column; text-align: center; }
+            .btn-group { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+            .toggle-group { flex-direction: column; gap: 15px; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <div class="nav-brand-icon">
+                <img src="/static/uploads/website/FindMeLogo.png" alt="Logo" style="width: 65px; height: 65px; object-fit: cover;">
+            </div>
+            <span>MFQOD</span>
+        </div>
+        <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+        <div class="nav-menu" id="navMenu">
+            <a href="/home" class="nav-link">🏠 Home</a>
+            <a href="/dashboard" class="nav-link">📊 Dashboard</a>
+            <a href="/users" class="nav-link">👥 Users</a>
+            <a href="/messages" class="nav-link">📨 Messages</a>
+            <a href="/profile" class="nav-link">👤 Profile</a>
+            <a href="/settings" class="nav-link active">⚙️ Settings</a>
+            {% if user and user.get('is_admin') %}
+            <a href="/admin" class="nav-link">👨‍💻 Admin</a>
+            {% endif %}
+        </div>
+        <div class="nav-actions">
+            <button class="notif-btn" onclick="window.location.href='/notifications'" style="width: 36px; height: 36px; background: var(--bg-light); border: 2px solid var(--border-light); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all 0.3s; position: relative;">
+                <span>🔔</span>
+                {% if user and user.get('unread_notifications', 0) > 0 %}
+                <span style="position: absolute; top: -5px; right: -5px; background: var(--error); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold;">{{ user['unread_notifications'] }}</span>
+                {% endif %}
+            </button>
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+                <span id="theme-icon">🌙</span>
+            </button>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-header-content">
+                <h1 class="page-title">
+                    <span class="page-title-emoji">⚙️</span>
+                    <span>Settings</span>
+                </h1>
+                <p class="page-subtitle">Manage your account settings and preferences</p>
+            </div>
+        </div>
+
+        <!-- Settings Navigation -->
+        <div class="settings-nav">
+            <button class="settings-nav-item active" data-tab="profile" onclick="switchTab('profile')">
+                <span>👤</span>
+                <span>Profile</span>
+            </button>
+            <button class="settings-nav-item" data-tab="account" onclick="switchTab('account')">
+                <span>🔐</span>
+                <span>Account</span>
+            </button>
+            <button class="settings-nav-item" data-tab="privacy" onclick="switchTab('privacy')">
+                <span>🔒</span>
+                <span>Privacy</span>
+            </button>
+            <button class="settings-nav-item" data-tab="notifications" onclick="switchTab('notifications')">
+                <span>🔔</span>
+                <span>Notifications</span>
+            </button>
+        </div>
+
+        <!-- Profile Settings Tab -->
+        <div class="tab-content active" id="profileTab">
+            <!-- Avatar Section -->
+            <div class="settings-section">
+                <div class="section-header">
+                    <span class="section-icon">📸</span>
+                    <div>
+                        <h2 class="section-title">Profile Picture</h2>
+                        <p class="section-description">Update your avatar image</p>
+                    </div>
+                </div>
+                
+                <div class="avatar-upload-section">
+                    <div class="current-avatar" id="currentAvatar">
+                        {% if user.avatar %}
+                        <img src="/static/uploads/avatars/{{ user.avatar }}" alt="{{ user.name }}" id="avatarPreview">
+                        {% else %}
+                        <span id="avatarInitial">{{ user.name[0].upper() }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="avatar-upload-info">
+                        <div class="avatar-upload-title">Change Your Avatar</div>
+                        <div class="avatar-upload-hint">JPG, PNG or GIF. Max size of 5MB.</div>
+                        
+                        <div class="avatar-upload-actions">
+                            <div class="file-input-wrapper">
+                                <input type="file" id="avatarInput" accept="image/*" onchange="previewAvatar(event)">
+                                <label for="avatarInput" class="file-input-label">
+                                    <span>📤</span>
+                                    <span>Upload Photo</span>
+                                </label>
+                            </div>
+                            {% if user.avatar %}
+                            <button class="remove-avatar-btn" onclick="removeAvatar()">
+                                <span>🗑️</span>
+                                <span>Remove</span>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Information -->
+            <form id="profileForm" onsubmit="updateProfile(event)">
+                <div class="settings-section">
+                    <div class="section-header">
+                        <span class="section-icon">ℹ️</span>
+                        <div>
+                            <h2 class="section-title">Profile Information</h2>
+                            <p class="section-description">Update your personal details</p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="name">Full Name *</label>
+                        <input type="text" id="name" class="form-input" value="{{ user.name }}" required>
+                        <p class="form-hint">Your display name on MFQOD</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email Address *</label>
+                        <input type="email" id="email" class="form-input" value="{{ user.email }}" readonly disabled style="opacity: 0.6; cursor: not-allowed;">
+                        <p class="form-hint">Email cannot be changed for security reasons</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="bio">Bio</label>
+                        <textarea id="bio" class="form-input" placeholder="Tell us about yourself..." maxlength="50" oninput="updateBioCounter()">{{ user.bio if user.bio else '' }}</textarea>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <p class="form-hint">Write a short bio about yourself (max 50 characters)</p>
+                            <span id="bioCounter" style="font-size: 12px; font-weight: 700; color: #64748b;">0/50</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="phone">Phone Number</label>
+                        <input type="tel" id="phone" class="form-input" value="{{ user.phone if user.phone else '' }}" placeholder="+1 (555) 000-0000">
+                        <p class="form-hint">Your contact phone number (optional)</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="location">Location</label>
+                        <input type="text" id="location" class="form-input" value="{{ user.location if user.location else '' }}" placeholder="City, Country">
+                        <p class="form-hint">Where are you located? (optional)</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="website">Website</label>
+                        <input type="url" id="website" class="form-input" value="{{ user.website if user.website else '' }}" placeholder="https://example.com">
+                        <p class="form-hint">Your personal website or portfolio (optional)</p>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-secondary" onclick="resetProfileForm()">
+                            <span>↺</span>
+                            <span>Reset</span>
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="profileSubmitBtn">
+                            <span>💾</span>
+                            <span>Save Changes</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Account Settings Tab -->
+        <div class="tab-content" id="accountTab">
+            <!-- Change Password -->
+            <form id="passwordForm" onsubmit="changePassword(event)">
+                <div class="settings-section">
+                    <div class="section-header">
+                        <span class="section-icon">🔑</span>
+                        <div>
+                            <h2 class="section-title">Change Password</h2>
+                            <p class="section-description">Update your password to keep your account secure</p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="currentPassword">Current Password *</label>
+                        <input type="password" id="currentPassword" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="newPassword">New Password *</label>
+                        <input type="password" id="newPassword" class="form-input" required oninput="checkPasswordStrength()">
+                        <div class="password-strength">
+                            <div class="password-strength-bar" id="passwordStrengthBar"></div>
+                        </div>
+                        <p class="password-strength-text" id="passwordStrengthText"></p>
+                        <p class="form-hint">Must be at least 8 characters long</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="confirmPassword">Confirm New Password *</label>
+                        <input type="password" id="confirmPassword" class="form-input" required>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-secondary" onclick="resetPasswordForm()">
+                            <span>✕</span>
+                            <span>Cancel</span>
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="passwordSubmitBtn">
+                            <span>🔐</span>
+                            <span>Update Password</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Danger Zone -->
+            <div class="settings-section">
+                <div class="section-header">
+                    <span class="section-icon">⚠️</span>
+                    <div>
+                        <h2 class="section-title">Danger Zone</h2>
+                        <p class="section-description">Irreversible and destructive actions</p>
+                    </div>
+                </div>
+                
+                <div class="danger-zone">
+                    <h3 class="danger-zone-title">
+                        <span>🗑️</span>
+                        <span>Delete Account</span>
+                    </h3>
+                    <p class="danger-zone-description">
+                        Once you delete your account, there is no going back. This will permanently delete your profile, posts, messages, and all associated data. Please be certain.
+                    </p>
+                    <button class="btn btn-danger" onclick="deleteAccount()">
+                        <span>⚠️</span>
+                        <span>Delete My Account</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy Settings Tab -->
+        <div class="tab-content" id="privacyTab">
+            <div class="settings-section">
+                <div class="section-header">
+                    <span class="section-icon">🔒</span>
+                    <div>
+                        <h2 class="section-title">Privacy Settings</h2>
+                        <p class="section-description">Control who can see your information</p>
+                    </div>
+                </div>
+                
+                <div class="toggle-group">
+                    <div class="toggle-label">
+                        <div class="toggle-title">Show Email to Others</div>
+                        <div class="toggle-description">Allow other users to see your email address</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="showEmail" onchange="updatePrivacySetting('showEmail', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-group">
+                    <div class="toggle-label">
+                        <div class="toggle-title">Show Phone Number</div>
+                        <div class="toggle-description">Display your phone number on your profile</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="showPhone" onchange="updatePrivacySetting('showPhone', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-group">
+                    <div class="toggle-label">
+                        <div class="toggle-title">Show Online Status</div>
+                        <div class="toggle-description">Let others see when you're online</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="showOnlineStatus" checked onchange="updatePrivacySetting('showOnlineStatus', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-group">
+                    <div class="toggle-label">
+                        <div class="toggle-title">Allow Message Requests</div>
+                        <div class="toggle-description">Receive message requests from other users</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="allowMessageRequests" checked onchange="updatePrivacySetting('allowMessageRequests', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Settings Tab -->
+        <div class="tab-content" id="notificationsTab">
+            <div class="settings-section">
+                <div class="section-header">
+                    <span class="section-icon">🔔</span>
+                    <div>
+                        <h2 class="section-title">Notification Preferences</h2>
+                        <p class="section-description">Choose what notifications you want to receive</p>
+                    </div>
+                </div>
+                
+                <div class="toggle-group">
+                    <div class="toggle-label">
+                        <div class="toggle-title">Post Likes</div>
+                        <div class="toggle-description">Get notified when someone likes your post</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notifyLikes" checked onchange="updateNotificationSetting('notifyLikes', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-group">
+                    <div class="toggle-label">
+                        <div class="toggle-title">Comments</div>
+                        <div class="toggle-description">Get notified when someone comments on your post</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notifyComments" checked onchange="updateNotificationSetting('notifyComments', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-group">
+                    <div class="toggle-label">
+                        <div class="toggle-title">Reposts</div>
+                        <div class="toggle-description">Get notified when someone reposts your content</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notifyReposts" checked onchange="updateNotificationSetting('notifyReposts', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-group">
+                    <div class="toggle-label">
+                        <div class="toggle-title">New Messages</div>
+                        <div class="toggle-description">Get notified when you receive new messages</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notifyMessages" checked onchange="updateNotificationSetting('notifyMessages', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-group">
+                    <div class="toggle-label">
+                        <div class="toggle-title">Message Requests</div>
+                        <div class="toggle-description">Get notified of new message requests</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notifyMessageRequests" checked onchange="updateNotificationSetting('notifyMessageRequests', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        let selectedAvatarFile = null;
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Update nav items
+            document.querySelectorAll('.settings-nav-item').forEach(item => {
+                if (item.getAttribute('data-tab') === tabName) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        // Preview avatar
+        function previewAvatar(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Check file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                showNotification({
+                    type: 'error',
+                    title: 'File Too Large',
+                    message: 'Avatar image must be less than 5MB',
+                    duration: 3000
+                });
+                return;
+            }
+            
+            selectedAvatarFile = file;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const avatarContainer = document.getElementById('currentAvatar');
+                const existingImg = document.getElementById('avatarPreview');
+                
+                if (existingImg) {
+                    existingImg.src = e.target.result;
+                } else {
+                    const initial = document.getElementById('avatarInitial');
+                    if (initial) initial.remove();
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.id = 'avatarPreview';
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.borderRadius = '50%';
+                    img.style.objectFit = 'cover';
+                    avatarContainer.appendChild(img);
+                }
+            };
+            reader.readAsDataURL(file);
+            
+            // Auto-upload avatar
+            uploadAvatar();
+        }
+
+        // Upload avatar
+        async function uploadAvatar() {
+            if (!selectedAvatarFile) return;
+            
+            const formData = new FormData();
+            formData.append('avatar', selectedAvatarFile);
+            
+            try {
+                const response = await fetch('/api/update-profile', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification({
+                        type: 'success',
+                        title: '✅ Avatar Updated',
+                        message: 'Your profile picture has been updated',
+                        duration: 3000
+                    });
+                    selectedAvatarFile = null;
+                } else {
+                    showNotification({
+                        type: 'error',
+                        title: 'Upload Failed',
+                        message: data.message || 'Failed to upload avatar',
+                        duration: 3000
+                    });
+                }
+            } catch (error) {
+                console.error('Upload avatar error:', error);
+                showNotification({
+                    type: 'error',
+                    title: 'Error',
+                    message: 'Failed to upload avatar',
+                    duration: 3000
+                });
+            }
+        }
+
+        // Remove avatar
+        async function removeAvatar() {
+            const confirmed = await showDialog({
+                type: 'warning',
+                title: 'Remove Avatar',
+                message: 'Are you sure you want to remove your profile picture?',
+                confirmText: 'Remove',
+                danger: true
+            });
+            
+            if (!confirmed) return;
+            
+            try {
+                const formData = new FormData();
+                formData.append('remove_avatar', 'true');
+                
+                const response = await fetch('/api/update-profile', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification({
+                        type: 'success',
+                        title: '✅ Avatar Removed',
+                        message: 'Your profile picture has been removed',
+                        duration: 3000
+                    });
+                    
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showNotification({
+                        type: 'error',
+                        title: 'Remove Failed',
+                        message: data.message || 'Failed to remove avatar',
+                        duration: 3000
+                    });
+                }
+            } catch (error) {
+                console.error('Remove avatar error:', error);
+                showNotification({
+                    type: 'error',
+                    title: 'Error',
+                    message: 'Failed to remove avatar',
+                    duration: 3000
+                });
+            }
+        }
+
+        // Update profile
+        async function updateProfile(event) {
+            event.preventDefault();
+            
+            const submitBtn = document.getElementById('profileSubmitBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span><span>Saving...</span>';
+            
+            const formData = new FormData();
+            formData.append('name', document.getElementById('name').value.trim());
+            formData.append('bio', document.getElementById('bio').value.trim());
+            formData.append('phone', document.getElementById('phone').value.trim());
+            formData.append('location', document.getElementById('location').value.trim());
+            formData.append('website', document.getElementById('website').value.trim());
+            
+            try {
+                const response = await fetch('/api/update-profile', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification({
+                        type: 'success',
+                        title: '✅ Profile Updated',
+                        message: 'Your profile has been updated successfully',
+                        duration: 3000
+                    });
+                } else {
+                    showNotification({
+                        type: 'error',
+                        title: 'Update Failed',
+                        message: data.message || 'Failed to update profile',
+                        duration: 3000
+                    });
+                }
+            } catch (error) {
+                console.error('Update profile error:', error);
+                showNotification({
+                    type: 'error',
+                    title: 'Error',
+                    message: 'Failed to update profile',
+                    duration: 3000
+                });
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        }
+
+        // Reset profile form
+        function resetProfileForm() {
+            document.getElementById('profileForm').reset();
+            document.getElementById('name').value = '{{ user.name }}';
+            document.getElementById('bio').value = '{{ user.bio if user.bio else "" }}';
+            document.getElementById('phone').value = '{{ user.phone if user.phone else "" }}';
+            document.getElementById('location').value = '{{ user.location if user.location else "" }}';
+            document.getElementById('website').value = '{{ user.website if user.website else "" }}';
+        }
+
+        // Check password strength
+        function checkPasswordStrength() {
+            const password = document.getElementById('newPassword').value;
+            const strengthBar = document.getElementById('passwordStrengthBar');
+            const strengthText = document.getElementById('passwordStrengthText');
+            
+            if (!password) {
+                strengthBar.className = 'password-strength-bar';
+                strengthText.textContent = '';
+                return;
+            }
+            
+            let strength = 0;
+            
+            // Check length
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+            
+            // Check character types
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^a-zA-Z0-9]/.test(password)) strength++;
+            
+            if (strength <= 2) {
+                strengthBar.className = 'password-strength-bar weak';
+                strengthText.textContent = 'Weak password';
+                strengthText.style.color = 'var(--error)';
+            } else if (strength <= 4) {
+                strengthBar.className = 'password-strength-bar medium';
+                strengthText.textContent = 'Medium strength';
+                strengthText.style.color = '#f59e0b';
+            } else {
+                strengthBar.className = 'password-strength-bar strong';
+                strengthText.textContent = 'Strong password';
+                strengthText.style.color = 'var(--success)';
+            }
+        }
+
+        // Change password
+        async function changePassword(event) {
+            event.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validation
+            if (newPassword.length < 8) {
+                showNotification({
+                    type: 'error',
+                    title: 'Validation Error',
+                    message: 'Password must be at least 8 characters long',
+                    duration: 3000
+                });
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showNotification({
+                    type: 'error',
+                    title: 'Validation Error',
+                    message: 'Passwords do not match',
+                    duration: 3000
+                });
+                return;
+            }
+            
+            const submitBtn = document.getElementById('passwordSubmitBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span><span>Updating...</span>';
+            
+            try {
+                const response = await fetch('/api/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        current_password: currentPassword,
+                        new_password: newPassword
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification({
+                        type: 'success',
+                        title: '✅ Password Changed',
+                        message: 'Your password has been updated successfully',
+                        duration: 3000
+                    });
+                    
+                    resetPasswordForm();
+                } else {
+                    showNotification({
+                        type: 'error',
+                        title: 'Change Failed',
+                        message: data.message || 'Failed to change password',
+                        duration: 3000
+                    });
+                }
+            } catch (error) {
+                console.error('Change password error:', error);
+                showNotification({
+                    type: 'error',
+                    title: 'Error',
+                    message: 'Failed to change password',
+                    duration: 3000
+                });
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        }
+
+        // Reset password form
+        function resetPasswordForm() {
+            document.getElementById('passwordForm').reset();
+            document.getElementById('passwordStrengthBar').className = 'password-strength-bar';
+            document.getElementById('passwordStrengthText').textContent = '';
+        }
+
+        // Update privacy setting
+        async function updatePrivacySetting(setting, value) {
+            console.log(`Privacy setting ${setting}:`, value);
+            
+            showNotification({
+                type: 'success',
+                title: '✅ Setting Updated',
+                message: `Privacy setting has been updated`,
+                duration: 2000
+            });
+            
+            // TODO: Implement backend API
+        }
+
+        // Update notification setting
+        async function updateNotificationSetting(setting, value) {
+            console.log(`Notification setting ${setting}:`, value);
+            
+            showNotification({
+                type: 'success',
+                title: '✅ Setting Updated',
+                message: `Notification preference has been updated`,
+                duration: 2000
+            });
+            
+            // TODO: Implement backend API
+        }
+
+        // Delete account
+        async function deleteAccount() {
+            const confirmed = await showDialog({
+                type: 'warning',
+                title: '⚠️ Delete Account',
+                message: 'Are you absolutely sure? This action cannot be undone. All your data will be permanently deleted.',
+                confirmText: 'Yes, Delete My Account',
+                danger: true
+            });
+            
+            if (!confirmed) return;
+            
+            // Second confirmation
+            const finalConfirm = await showDialog({
+                type: 'warning',
+                title: '⚠️ Final Confirmation',
+                message: 'This is your last chance. Type "DELETE" to confirm account deletion.',
+                confirmText: 'DELETE',
+                danger: true
+            });
+            
+            if (!finalConfirm) return;
+            
+            try {
+                const response = await fetch('/api/delete-account', {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification({
+                        type: 'success',
+                        title: '✅ Account Deleted',
+                        message: 'Your account has been deleted. Goodbye!',
+                        duration: 3000
+                    });
+                    
+                    setTimeout(() => {
+                        window.location.href = '/logout';
+                    }, 2000);
+                } else {
+                    showNotification({
+                        type: 'error',
+                        title: 'Delete Failed',
+                        message: data.message || 'Failed to delete account',
+                        duration: 3000
+                    });
+                }
+            } catch (error) {
+                console.error('Delete account error:', error);
+                showNotification({
+                    type: 'error',
+                    title: 'Error',
+                    message: 'Failed to delete account',
+                    duration: 3000
+                });
+            }
+        }
+
+
+        function updateBioCounter() {
+            const bio = document.getElementById('bio').value;
+            const counter = document.getElementById('bioCounter');
+            const length = bio.length;
+            
+            counter.textContent = `${length}/50`;
+            
+            if (length >= 50) {
+                counter.style.color = 'var(--error)';
+            } else if (length >= 40) {
+                counter.style.color = '#f59e0b';
+            } else {
+                counter.style.color = '#64748b';
+            }
+        }
+
+        // Initialize counter on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+            updateBioCounter(); // Add this line
+        });
+        
+    </script>
+</body>
+</html>
